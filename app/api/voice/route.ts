@@ -10,12 +10,19 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const to = formData.get('To') as string
     const from = formData.get('From') as string
+    const callDirection = formData.get('Direction') as string
     
-    console.log('Voice webhook - To:', to, 'From:', from)
+    console.log('Voice webhook - To:', to, 'From:', from, 'Direction:', callDirection)
     
     const twiml = new VoiceResponse()
 
-    if (to) {
+    // Check if this is an incoming call to your Twilio number
+    if (callDirection === 'inbound' || to === process.env.TWILIO_PHONE_NUMBER) {
+      // Incoming call - route to browser
+      console.log('Routing incoming call to browser')
+      const dial = twiml.dial()
+      dial.client('browser-client')
+    } else if (to) {
       // Outbound call from browser
       const dial = twiml.dial({
         callerId: process.env.TWILIO_PHONE_NUMBER
@@ -28,10 +35,9 @@ export async function POST(request: NextRequest) {
         dial.number(to)
       }
     } else {
-      // Inbound call to your Twilio number
-      console.log('Routing incoming call to browser')
-      const dial = twiml.dial()
-      dial.client('browser-client')  // This will ring all connected browsers
+      // Fallback - should not happen
+      console.log('Unexpected call parameters')
+      twiml.say('Sorry, an error occurred. Please try again.')
     }
 
     return new NextResponse(twiml.toString(), {
