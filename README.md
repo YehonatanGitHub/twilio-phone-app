@@ -181,6 +181,26 @@ When deploying to production:
   - Call logging and monitoring
   - IP whitelisting for sensitive operations
 
+## Maintenance Mode
+
+The app includes a built-in maintenance mode killswitch for quickly disabling service:
+
+### Enable Maintenance Mode:
+1. Go to your Vercel project settings
+2. Navigate to Environment Variables
+3. Add: `MAINTENANCE_MODE=1`
+4. Save and the app will immediately show a maintenance page
+
+### Disable Maintenance Mode:
+1. Set `MAINTENANCE_MODE=0` or delete the variable
+2. The app will immediately resume normal operation
+
+### What happens during maintenance:
+- Web visitors see a friendly maintenance page
+- API calls return 503 Service Unavailable
+- Voice calls hear: "Sorry, our phone service is temporarily unavailable"
+- No code changes or redeployment needed
+
 ## License
 
 MIT
