@@ -27,7 +27,6 @@ export function useTwilioDevice(options: UseDeviceOptions = {}) {
 
         const newDevice = new Device(token, {
           codecPreferences: [Call.Codec.Opus, Call.Codec.PCMU],
-          enableRingingState: true,
         })
 
         // Set up event handlers
