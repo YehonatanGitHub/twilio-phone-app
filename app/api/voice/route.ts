@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const twiml = new VoiceResponse()
 
     if (to) {
-      // Outbound call
+      // Outbound call from browser
       const dial = twiml.dial({
         callerId: process.env.TWILIO_PHONE_NUMBER
       })
@@ -28,8 +28,10 @@ export async function POST(request: NextRequest) {
         dial.number(to)
       }
     } else {
-      // Inbound call
-      twiml.dial().client('browser-client')
+      // Inbound call to your Twilio number
+      console.log('Routing incoming call to browser')
+      const dial = twiml.dial()
+      dial.client('browser-client')  // This will ring all connected browsers
     }
 
     return new NextResponse(twiml.toString(), {

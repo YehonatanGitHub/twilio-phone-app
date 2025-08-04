@@ -15,8 +15,8 @@ export async function GET() {
     console.log('Token generation - API Key SID:', apiKeySid)
     console.log('Token generation - TwiML App SID:', twimlAppSid)
 
-    // Generate a random identity for the client
-    const identity = `user-${Math.random().toString(36).substring(2, 15)}`
+    // Use a fixed identity for incoming calls to work
+    const identity = 'browser-client'
 
     // Create access token with credentials
     const token = new AccessToken(
