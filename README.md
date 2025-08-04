@@ -133,15 +133,53 @@ twilio-phone-app/
 
 ## Production Deployment
 
-When deploying to production:
+### Deploy to Vercel (Recommended)
 
-1. Update your TwiML App Voice URL to your production domain
-2. Ensure all environment variables are set in your hosting platform
-3. Use HTTPS (required for WebRTC)
-4. Consider implementing additional security measures:
-   - Rate limiting on token generation
-   - User authentication
-   - Call logging and monitoring
+1. **Push to GitHub:**
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/twilio-phone-app.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+2. **Deploy on Vercel:**
+   - Go to [vercel.com](https://vercel.com) and sign in with GitHub
+   - Click "New Project"
+   - Import your `twilio-phone-app` repository
+   - Configure environment variables:
+     - Add all variables from `.env.local` in Vercel's Environment Variables section
+   - Click "Deploy"
+
+3. **Update Twilio Configuration:**
+   - Get your Vercel app URL (e.g., `https://twilio-phone-app.vercel.app`)
+   - In Twilio Console, update your TwiML App's Voice URL to:
+     ```
+     https://your-app.vercel.app/api/voice
+     ```
+   - Save the changes
+
+4. **Test Your Deployment:**
+   - Visit your Vercel app URL
+   - Try making an outbound call
+   - Call your Twilio number to test inbound calls
+
+### Why Vercel?
+
+- **Free hosting** for personal projects
+- **Automatic HTTPS** (required for WebRTC)
+- **Global CDN** for fast loading
+- **Automatic deployments** when you push to GitHub
+- **Serverless functions** work perfectly with Next.js API routes
+
+### Security Considerations
+
+When deploying to production:
+- Vercel automatically keeps your environment variables secure
+- Consider implementing additional security measures:
+  - Rate limiting on token generation
+  - User authentication
+  - Call logging and monitoring
+  - IP whitelisting for sensitive operations
 
 ## License
 
