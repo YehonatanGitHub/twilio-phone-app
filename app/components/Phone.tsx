@@ -7,6 +7,7 @@ import { Call } from '@twilio/voice-sdk'
 export default function Phone() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [incomingCallFrom, setIncomingCallFrom] = useState<string | null>(null)
+  const [audioInitialized, setAudioInitialized] = useState(false)
   
   const {
     activeCall,
@@ -29,11 +30,30 @@ export default function Phone() {
     },
   })
 
+  const initializeAudio = () => {
+    // This user interaction allows the AudioContext to start
+    setAudioInitialized(true)
+  }
+
   const handleCall = async () => {
     if (activeCall) {
       hangUp()
     } else if (phoneNumber) {
-      await makeCall(phoneNumber)
+      // Format the number with country code
+      let formattedNumber = phoneNumber
+      
+      // If it's a 10-digit US number, add +1
+      if (phoneNumber.length === 10) {
+        formattedNumber = '+1' + phoneNumber
+      } else if (phoneNumber.length === 11 && phoneNumber.startsWith('1')) {
+        formattedNumber = '+' + phoneNumber
+      } else if (!phoneNumber.startsWith('+')) {
+        // For other numbers, assume they need a +
+        formattedNumber = '+' + phoneNumber
+      }
+      
+      console.log('Calling:', formattedNumber)
+      await makeCall(formattedNumber)
     }
   }
 
@@ -50,15 +70,19 @@ export default function Phone() {
 
   const formatPhoneNumber = (number: string) => {
     const cleaned = number.replace(/\D/g, '')
+    if (cleaned.length === 0) return ''
     if (cleaned.length <= 3) return cleaned
     if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`
+    if (cleaned.length <= 10) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
+    // Handle numbers with country code (1 + 10 digits)
+    return `+${cleaned.slice(0, 1)} (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`
   }
 
   return (
     <div className="max-w-sm mx-auto p-6 bg-white rounded-lg shadow-lg">
       <div className="mb-4">
         <h2 className="text-2xl font-bold text-center mb-2">Twilio Phone</h2>
+        
         
         {/* Status indicators */}
         <div className="flex justify-center gap-4 text-sm mb-4">
@@ -106,7 +130,7 @@ export default function Phone() {
             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
             placeholder="Enter phone number"
             className="w-full text-center text-xl bg-transparent outline-none"
-            disabled={!isReady}
+            disabled={!isRegistered}
           />
           {callStatus && (
             <p className="text-center text-sm text-gray-600 mt-2">
@@ -121,7 +145,7 @@ export default function Phone() {
             <button
               key={digit}
               onClick={() => handleKeyPress(digit)}
-              disabled={!isReady}
+              disabled={!isRegistered}
               className="p-4 text-lg font-semibold bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {digit}
@@ -133,14 +157,14 @@ export default function Phone() {
         <div className="flex gap-2 mb-2">
           <button
             onClick={handleBackspace}
-            disabled={!isReady || phoneNumber.length === 0}
+            disabled={!isRegistered || phoneNumber.length === 0}
             className="flex-1 p-3 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             ⌫ Delete
           </button>
           <button
             onClick={handleCall}
-            disabled={!isReady || (!activeCall && phoneNumber.length === 0)}
+            disabled={!isRegistered || (!activeCall && phoneNumber.length === 0)}
             className={`flex-1 p-3 rounded text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${
               activeCall ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
             }`}

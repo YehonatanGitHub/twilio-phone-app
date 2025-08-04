@@ -33,6 +33,7 @@ export function useTwilioDevice(options: UseDeviceOptions = {}) {
 
         // Set up event handlers
         newDevice.on('ready', () => {
+          console.log('Device is ready!')
           if (mounted) {
             setIsReady(true)
             setError(null)
@@ -40,16 +41,22 @@ export function useTwilioDevice(options: UseDeviceOptions = {}) {
         })
 
         newDevice.on('registered', () => {
+          console.log('Device registered successfully!')
           if (mounted) setIsRegistered(true)
         })
 
         newDevice.on('unregistered', () => {
+          console.log('Device unregistered')
           if (mounted) setIsRegistered(false)
         })
 
         newDevice.on('error', (error) => {
           console.error('Device error:', error)
           if (mounted) setError(error.message)
+        })
+        
+        newDevice.on('registering', () => {
+          console.log('Device is registering...')
         })
 
         newDevice.on('incoming', (call: Call) => {
@@ -84,6 +91,10 @@ export function useTwilioDevice(options: UseDeviceOptions = {}) {
         
         if (mounted) {
           setDevice(newDevice)
+          
+          // The device is registered but not ready due to AudioContext autoplay policy
+          // It will become ready after first user interaction
+          console.log('Device initialized and registered. Click anywhere to activate audio.')
         }
       } catch (err) {
         console.error('Failed to initialize device:', err)

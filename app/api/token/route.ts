@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
+import twilio from 'twilio'
+
+const AccessToken = twilio.jwt.AccessToken
+const VoiceGrant = AccessToken.VoiceGrant
 
 export async function GET() {
   try {
@@ -9,39 +11,42 @@ export async function GET() {
     const apiKeySecret = process.env.TWILIO_API_KEY_SECRET!
     const twimlAppSid = process.env.TWILIO_TWIML_APP_SID!
 
+    console.log('Token generation - Account SID:', accountSid)
+    console.log('Token generation - API Key SID:', apiKeySid)
+    console.log('Token generation - TwiML App SID:', twimlAppSid)
+
     // Generate a random identity for the client
-    const identity = crypto.randomBytes(16).toString('hex')
+    const identity = `user-${Math.random().toString(36).substring(2, 15)}`
 
-    // Create access token
-    const now = Math.floor(Date.now() / 1000)
-    const payload = {
-      jti: `${apiKeySid}-${now}`,
-      iss: apiKeySid,
-      sub: accountSid,
-      exp: now + 3600, // Token expires in 1 hour
-      grants: {
+    // Create access token with credentials
+    const token = new AccessToken(
+      accountSid,
+      apiKeySid,
+      apiKeySecret,
+      { 
         identity: identity,
-        voice: {
-          outgoing: {
-            application_sid: twimlAppSid
-          },
-          incoming: {
-            allow: true
-          }
-        }
+        ttl: 3600 // 1 hour in seconds
       }
-    }
+    )
 
-    const token = jwt.sign(payload, apiKeySecret, {
-      algorithm: 'HS256',
-      header: {
-        cty: 'twilio-fpa;v=1',
-        typ: 'JWT'
-      }
+    // Create a Voice grant
+    const voiceGrant = new VoiceGrant({
+      outgoingApplicationSid: twimlAppSid,
+      incomingAllow: true
     })
 
+    // Add the grant to the token
+    token.addGrant(voiceGrant)
+
+    // Generate the JWT
+    const jwt = token.toJwt()
+    
+    console.log('Generated token:', jwt.substring(0, 50) + '...')
+    console.log('Token identity:', identity)
+    
+    // Return the token
     return NextResponse.json({ 
-      token,
+      token: jwt,
       identity 
     })
   } catch (error) {

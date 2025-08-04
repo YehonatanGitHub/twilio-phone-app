@@ -4,10 +4,14 @@ import twilio from 'twilio'
 const VoiceResponse = twilio.twiml.VoiceResponse
 
 export async function POST(request: NextRequest) {
+  console.log('Voice webhook called')
+  
   try {
     const formData = await request.formData()
     const to = formData.get('To') as string
     const from = formData.get('From') as string
+    
+    console.log('Voice webhook - To:', to, 'From:', from)
     
     const twiml = new VoiceResponse()
 

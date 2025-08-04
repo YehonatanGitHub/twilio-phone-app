@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@twilio/voice-sdk": "^2.15.0",
-    "@types/jsonwebtoken": "^9.0.10",
-    "jsonwebtoken": "^9.0.2",
     "next": "15.4.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
