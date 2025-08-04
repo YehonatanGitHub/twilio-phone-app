@@ -11,17 +11,30 @@ export async function POST(request: NextRequest) {
     const to = formData.get('To') as string
     const from = formData.get('From') as string
     const callDirection = formData.get('Direction') as string
+    const callSid = formData.get('CallSid') as string
     
-    console.log('Voice webhook - To:', to, 'From:', from, 'Direction:', callDirection)
+    console.log('Voice webhook:', {
+      callSid,
+      to,
+      from,
+      direction: callDirection,
+      twilioNumber: process.env.TWILIO_PHONE_NUMBER
+    })
     
     const twiml = new VoiceResponse()
 
     // Check if this is an incoming call to your Twilio number
-    if (callDirection === 'inbound' || to === process.env.TWILIO_PHONE_NUMBER) {
+    if (callDirection === 'inbound' || (to === process.env.TWILIO_PHONE_NUMBER && from !== process.env.TWILIO_PHONE_NUMBER)) {
       // Incoming call - route to browser
-      console.log('Routing incoming call to browser')
-      const dial = twiml.dial()
+      console.log('Routing incoming call to browser from:', from)
+      const dial = twiml.dial({
+        timeout: 30,
+        action: '/api/voice-status',
+      })
       dial.client('browser-client')
+      
+      // Add a fallback if no client answers
+      twiml.say('Sorry, no one is available to take your call right now. Please try again later.')
     } else if (to) {
       // Outbound call from browser
       const dial = twiml.dial({
