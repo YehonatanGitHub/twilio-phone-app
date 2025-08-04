@@ -86,12 +86,14 @@ export default function Phone() {
         
         {/* Status indicators */}
         <div className="flex justify-center gap-4 text-sm mb-4">
-          <span className={`px-2 py-1 rounded ${isReady ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {isReady ? 'Ready' : 'Not Ready'}
+          <span className={`px-2 py-1 rounded ${isRegistered ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {isRegistered ? '✓ Connected' : 'Disconnected'}
           </span>
-          <span className={`px-2 py-1 rounded ${isRegistered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-            {isRegistered ? 'Registered' : 'Not Registered'}
-          </span>
+          {!isReady && isRegistered && (
+            <span className="px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">
+              Audio starts on first call
+            </span>
+          )}
         </div>
 
         {error && (
